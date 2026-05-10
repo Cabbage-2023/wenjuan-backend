@@ -1,39 +1,45 @@
-import { Controller, Get, Query, Param, Patch, Body, HttpException } from '@nestjs/common';
+import { Controller, Get, Query, Param, Patch, Body, Post, Delete } from '@nestjs/common';
 
 import { QuestionDto } from './dto/question.dto';
+import { QuestionService } from './question.service';
 
 @Controller('question')
 export class QuestionController {
-  @Get('test')
-  test() {
-    throw new HttpException('test error', 400);
+  // 从 QuestionService 中注入 QuestionService
+  constructor(private readonly questionService: QuestionService) {}
+
+  // @Get('test')
+  // test() {
+  //   throw new HttpException('test error', 400);
+  // }
+
+  @Post()
+  create() {
+    return this.questionService.create();
   }
 
   @Get()
-  findAll(@Query('keyword') keyword: string, @Query('page') page: number, @Query('pageSize') pageSize: number) {
-    console.log(keyword, page, pageSize);
+  async findAll(@Query('keyword') keyword: string, @Query('page') page: number, @Query('pageSize') pageSize: number) {
+    const list = await this.questionService.findAllList({ keyword, page, pageSize });
+    const count = await this.questionService.countAll({ keyword });
     return {
-      questions: ['a', 'b', 'c'],
-      count: 10,
+      list,
+      count,
     };
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return {
-      id: id, // 这里应该返回动态拿到的 id，而不是写死的 1
-      title: `question ${id}`,
-      desc: `description for ${id}`,
-    };
+    return this.questionService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() questionDto: QuestionDto) {
-    console.log(questionDto);
-    return {
-      id,
-      title: 'aaa',
-      desc: 'bbb',
-    };
+  updateOne(@Param('id') id: string, @Body() questionDto: QuestionDto) {
+    return this.questionService.update(id, questionDto);
+  }
+
+  @Delete(':id')
+  deleteOne(@Param('id') id: string) {
+    return this.questionService.delete(id);
   }
 }
