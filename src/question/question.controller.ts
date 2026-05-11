@@ -20,9 +20,34 @@ export class QuestionController {
   }
 
   @Get()
-  async findAll(@Query('keyword') keyword: string, @Query('page') page: number, @Query('pageSize') pageSize: number) {
-    const list = await this.questionService.findAllList({ keyword, page, pageSize });
-    const count = await this.questionService.countAll({ keyword });
+  async findAll(
+    @Query('keyword') keyword: string,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+    @Query('isDeleted') isDeleted: string, // 先拿字符串
+    @Query('isStar') isStar: string, // 先拿字符串
+    @Request() req,
+  ) {
+    const { username } = req.user;
+
+    // 显式转换为布尔值
+    const isDeletedBool = isDeleted === 'true';
+    const isStarBool = isStar === 'true';
+
+    const list = await this.questionService.findAllList({
+      keyword,
+      page: +page,
+      pageSize: +pageSize,
+      isDeleted: isDeletedBool,
+      isStar: isStarBool,
+      author: username,
+    });
+    const count = await this.questionService.countAll({
+      keyword,
+      author: username,
+      isDeleted: isDeletedBool,
+      isStar: isStarBool,
+    });
     return {
       list,
       count,
@@ -35,12 +60,27 @@ export class QuestionController {
   }
 
   @Patch(':id')
-  updateOne(@Param('id') id: string, @Body() questionDto: QuestionDto) {
-    return this.questionService.update(id, questionDto);
+  updateOne(@Param('id') id: string, @Body() questionDto: QuestionDto, @Request() req) {
+    const { username } = req.user;
+    return this.questionService.update(id, questionDto, username);
   }
 
   @Delete(':id')
-  deleteOne(@Param('id') id: string) {
-    return this.questionService.delete(id);
+  deleteOne(@Param('id') id: string, @Request() req) {
+    const { username } = req.user;
+    return this.questionService.delete(id, username);
+  }
+
+  @Delete()
+  deleteMany(@Body() body, @Request() req) {
+    const { username } = req.user;
+    const { ids = [] } = body;
+    return this.questionService.deleteMany(username, ids);
+  }
+
+  @Post('duplicate/:id')
+  duplicate(@Param('id') id: string, @Request() req) {
+    const { username } = req.user;
+    return this.questionService.duplicate(id, username);
   }
 }

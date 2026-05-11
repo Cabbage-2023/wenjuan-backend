@@ -10,6 +10,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor()); // 全局拦截器
   app.useGlobalFilters(new HttpExceptionFilter()); // 全局异常过滤器
 
-  await app.listen(process.env.PORT ?? 3005);
+  app.enableCors(); //跨域
+  await app.listen(3005);
 }
 bootstrap();

@@ -14,18 +14,33 @@ export class Question {
   @Prop()
   desc: string;
 
-  @Prop({ required: true })
-  author: string;
+  @Prop()
+  js: string;
+
+  @Prop()
+  css: string;
+
+  @Prop({ default: false })
+  isPublished: boolean;
 
   @Prop({ default: false }) // 默认为 false
   isStar: boolean;
 
   @Prop({ default: false })
-  isPublished: boolean;
+  isDeleted: boolean;
 
-  // 如果你有更复杂的字段，比如问卷内容
+  @Prop({ required: true })
+  author: string;
+
   @Prop()
-  content: string;
+  componentList: {
+    fe_id: string; //组件fe_id，需要前端控制，由前端生成
+    type: string;
+    title: string;
+    isHidden: boolean;
+    isLocked: boolean;
+    props: object; //组件属性
+  }[];
 }
 
 // 2. 生成真正的 Schema 供 Nest 模块使用
