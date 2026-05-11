@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, Patch, Body, Post, Delete } from '@nestjs/common';
+import { Controller, Get, Query, Param, Patch, Body, Post, Delete, Request } from '@nestjs/common';
 
 import { QuestionDto } from './dto/question.dto';
 import { QuestionService } from './question.service';
@@ -14,8 +14,9 @@ export class QuestionController {
   // }
 
   @Post()
-  create() {
-    return this.questionService.create();
+  create(@Request() req) {
+    const { username } = req.user;
+    return this.questionService.create(username);
   }
 
   @Get()

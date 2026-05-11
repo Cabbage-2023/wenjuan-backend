@@ -14,6 +14,9 @@ export class Question {
   @Prop()
   desc: string;
 
+  @Prop({ required: true })
+  author: string;
+
   @Prop({ default: false }) // 默认为 false
   isStar: boolean;
 

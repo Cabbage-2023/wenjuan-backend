@@ -11,10 +11,11 @@ export class QuestionService {
     private readonly questionModel,
   ) {}
 
-  async create() {
+  async create(username: string) {
     const question = new this.questionModel({
       title: 'title' + Date.now(),
       desc: 'test',
+      author: username,
     });
     return await question.save();
   }
