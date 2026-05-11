@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { QuestionModule } from './question/question.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { AnswerModule } from './answer/answer.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -16,7 +17,7 @@ dotenv.config();
     MongooseModule.forRoot(
       `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DATABASE}`,
     ), // 连接 MongoDB 数据库, 并使用环境变量中的配置
-    ConfigModule.forRoot(), UserModule, AuthModule,
+    ConfigModule.forRoot(), UserModule, AuthModule, AnswerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
