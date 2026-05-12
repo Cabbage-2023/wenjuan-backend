@@ -1,23 +1,22 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    const message = exception.message ? exception.message : '服务器错误';
+    const res = exception.getResponse() as any;
 
+    // 提取真实的错误消息（处理 NestJS 默认的错误对象）
+    const message = res.message ? (Array.isArray(res.message) ? res.message[0] : res.message) : exception.message;
+
+    // 🌟 统一返回结构，确保前端拦截器能直接拿到 msg
     response.status(status).json({
-      errno: status, // 通常我会建议这里也叫 errno，和你的拦截器对应上
-      data: {
-        errno: -1,
-        message, // 加上这个，前端才知道具体的报错原因
-        timestamp: new Date().toISOString(),
-        path: request.url,
-      },
+      errno: -1, // 只要不是 0，前端拦截器就会报错
+      msg: message, // 前端 message.error(msg) 用的就是这个字段
+      data: null, // 报错时 data 传空
     });
   }
 }
