@@ -19,19 +19,18 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/wenjuan-platform/backend
+            # 1. 确保使用 SSH 地址，这样拉取更稳定
+            git remote set-url origin git@github.com:Cabbage-2023/wenjuan-backend.git || true
             
-            # 确保 git 远程地址是正确的（如果是首次初始化）
-            if [ ! -d ".git" ]; then
-              git init
-              # 这种写法更稳健：如果 origin 不存在则添加，存在则直接更新
-              git remote set-url origin https://github.com/Cabbage-2023/wenjuan-backend.git || git remote add origin https://github.com/Cabbage-2023/wenjuan-backend.git
-            fi
-
+            # 2. 备份环境变量
             [ -f .env ] && cp .env .env.bak
-            git fetch --all
-            git reset --hard origin/main
+            
+            # 3. 强制同步 (如果一次失败，可以手动多试两次)
+            git fetch --all && git reset --hard origin/main
+            
+            # 4. 还原环境变量
             [ -f .env.bak ] && mv .env.bak .env
-
+            
+            # 5. 重启
             cd ~/wenjuan-platform
-            # 注意：这里的 backend 必须对应 docker-compose.yml 里的 service 名
             docker compose up -d --build backend
